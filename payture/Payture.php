@@ -44,6 +44,40 @@ abstract class Payture
         curl_close( $ch );
         return self::_convertResponse( $result );
     }
+    
+    /**
+     * Executes POST request to Payture gateway with JSON body and return answer, converted to stdClass
+     *
+     * @param string $operation Operation name, i.e. "Pay"
+     * @param string $apiPrefix Prefix for api type in URL
+     * @param array $params Array of pairs kay => value, that will be used as POST body in JSON format
+     *
+     * @return stdClass
+     */
+
+    protected static function postJSON( $operation, $apiPrefix, $data = [])
+    {
+        PaytureConfiguration::setApiPrefix($apiPrefix);
+
+        $url = self::generateLink($operation);
+        $json_data = json_encode($data);
+
+        $ch = curl_init($url);
+        
+        curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, 'POST' );
+        curl_setopt( $ch, CURLOPT_POSTFIELDS, $json_data );
+        curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
+        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
+        curl_setopt( $ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Content-Length: ' . strlen($json_data)
+        ] ); 
+
+        $result = curl_exec( $ch );
+        
+        curl_close( $ch );
+        return self::_convertResponse( $result );
+    }
 
     /**
      * Generate link for server request
@@ -53,7 +87,7 @@ abstract class Payture
      *
      * @return string
      */
-    protected static function generateLink($operation, $params )
+    protected static function generateLink($operation, $params = array() )
     {
         $link = "https://".self::_getDomain()."/".PaytureConfiguration::getApiPrefix()."/" . $operation."?".self::stringify($params, "&"); 
         return $link;
@@ -126,7 +160,7 @@ abstract class Payture
      *
      * @return string
      */
-    protected static function stringify( $array, $glue = ";" )
+    protected static function stringify( $array = array(), $glue = ";" )
     {
         $mergedArray = array();
         foreach ($array as $k => $v) {
