@@ -37,7 +37,7 @@ class PaytureInPay extends Payture
             array( "Key" => PaytureConfiguration::getMerchantKey(), "Data" => self::stringify( $data ) )
         );
 
-        if ($response) {
+        if ($response && isset($response->SessionId)) {
             self::$_sessionId = $response->SessionId;
         }
 
