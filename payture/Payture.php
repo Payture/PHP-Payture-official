@@ -68,8 +68,6 @@ abstract class Payture
      */
     private static function _convertResponse($XMLString)
     {
-        echo $XMLString;
-
         $xml = new SimpleXMLIterator($XMLString);
 
         $resultObject = self::_XMLNodeToArray($xml);
@@ -90,7 +88,8 @@ abstract class Payture
         $result = array();
         foreach($XMLNode->attributes() as $k => $v){
             $val = (string)$v;
-            if($val == "True" || $val == "False") $val = (bool)$val;
+            if ($val === "True") $val = true;
+            if ($val === "False") $val = false;
             $result[$k] = $val;
         }
         foreach($XMLNode->children() as $chK =>  $chNode){
